@@ -2,267 +2,76 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f4f1e8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>大作文背诵 · 六大方面</title>
-<style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
-:root{
-  --paper:#f4f1e8; --card:#fffdf7; --ink:#1f1d1a; --ink2:#413c33;
-  --muted:#8b8375; --line:#ded6c5; --line2:#eae3d3;
-  --red:#a2352a; --red-w:#f6e7e3; --green:#2f5a4d; --green-w:#e6efe9;
-  --amber:#a3772a; --amber-w:#f7eed9; --blue:#3b5566;
-}
-html,body{margin:0;padding:0;background:var(--paper);color:var(--ink)}
-body{
-  font:16px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC",sans-serif;
-  padding-bottom:calc(62px + env(safe-area-inset-bottom));
-  overscroll-behavior-y:contain;
-}
-img,svg{max-width:100%}
-h1,h2,h3,p,ul,ol{margin:0}
-button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
-input,textarea{font:inherit;color:inherit}
-#app{max-width:560px;margin:0 auto;min-height:100vh;background:var(--paper)}
-
-/* ---------- 顶栏 ---------- */
-.hd{
-  position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
-  gap:10px;padding:14px 16px 10px;background:var(--paper);
-  border-bottom:1px solid var(--line2);
-}
-.hd-t{font-size:17px;font-weight:600;letter-spacing:.5px}
-.hd-s{font-size:12px;color:var(--muted);font-weight:400;margin-left:6px}
-.hd-r{font-size:12px;color:var(--muted);white-space:nowrap}
-.back{display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 10px 0 0;font-size:14px;color:var(--ink2)}
-.back:before{content:"";width:8px;height:8px;border-left:1.5px solid var(--ink2);border-bottom:1.5px solid var(--ink2);transform:rotate(45deg);margin-right:6px;margin-left:4px}
-
-.wrap{padding:14px 16px 28px}
-.sec-t{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 10px}
-.sec-t h2{font-size:14px;font-weight:600;letter-spacing:.5px}
-.sec-t span{font-size:11.5px;color:var(--muted)}
-
-/* ---------- 卡片/面板 ---------- */
-.panel{background:var(--card);border:1px solid var(--line);border-radius:10px}
-.pad{padding:14px 14px}
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.k{font-size:13px;color:var(--muted)}
-.v{font-size:13px;color:var(--ink2)}
-.num{font-variant-numeric:tabular-nums}
-
-/* 今日 */
-.today{padding:16px 15px 14px;position:relative;overflow:hidden}
-.today:before{content:"";position:absolute;left:0;top:0;width:3px;height:100%;background:var(--red)}
-.today .big{display:flex;align-items:flex-end;gap:6px;margin:2px 0 2px}
-.today .big b{font-size:34px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
-.today .big i{font-style:normal;font-size:12px;color:var(--muted);padding-bottom:3px}
-.tl{display:flex;gap:16px;margin-top:10px}
-.tl div{font-size:12px;color:var(--muted)}
-.tl b{display:block;font-size:16px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
-.bar{height:4px;background:var(--line2);border-radius:2px;overflow:hidden;margin:12px 0 0}
-.bar i{display:block;height:100%;background:var(--green);transition:width .25s}
-.bar.r i{background:var(--red)}
-
-/* 按钮 */
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  height:46px;padding:0 16px;border-radius:8px;border:1px solid var(--line);
-  background:var(--card);font-size:15px;font-weight:500;width:100%;
-}
-.btn:active{background:#f0ebde}
-.btn.primary{background:var(--ink);border-color:var(--ink);color:#faf7ef}
-.btn.primary:active{background:#3a352c}
-.btn.ghost{border-color:transparent;background:transparent;color:var(--ink2);height:40px}
-.btn.sm{height:36px;font-size:13.5px;padding:0 12px;width:auto;border-radius:7px}
-.btn.danger{color:var(--red);border-color:#e5cfc8}
-.btns{display:flex;gap:10px}
-.btns .btn{width:auto;flex:1}
-
-/* ---------- 分组行 ---------- */
-.glist{border-top:1px solid var(--line2)}
-.grow{
-  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
-  padding:13px 2px 13px 0;border-bottom:1px solid var(--line2);
-}
-.grow:active{background:#efeade}
-.grow .gt{flex:1;min-width:0}
-.grow .gt b{display:block;font-size:14.5px;font-weight:600;letter-spacing:.2px}
-.grow .gt small{display:block;font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.45}
-.grow .gp{flex:0 0 auto;text-align:right;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
-.grow .gp b{display:block;font-size:13px;color:var(--ink2);font-weight:600}
-.chev:after{content:"";display:block;width:7px;height:7px;border-top:1.5px solid var(--line);border-right:1.5px solid var(--line);transform:rotate(45deg);margin-left:2px}
-.chev{border-color:transparent!important}
-
-/* 细进度 */
-.mini{height:3px;background:var(--line2);border-radius:2px;margin-top:7px;overflow:hidden}
-.mini i{display:block;height:100%;background:var(--green)}
-
-/* 标签 */
-.tags{display:flex;flex-wrap:wrap;gap:6px}
-.tag{font-size:11.5px;line-height:22px;padding:0 10px;border:1px solid var(--line);border-radius:4px;color:var(--ink2);background:#fbf8f1;white-space:nowrap;flex:0 0 auto}
-.tag.on{background:var(--ink);border-color:var(--ink);color:#faf7ef}
-.tag.red{color:var(--red);border-color:#e2c9c2;background:#fbf1ee}
-.chips{display:flex;flex-wrap:wrap;gap:7px;padding:2px 0 6px}
-
-
-/* 档位标记 */
-.dotp{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:1px}
-.dotp.p1{background:var(--red)}
-.dotp.p2{background:var(--amber)}
-.dotp.p3{background:#bdb4a1}
-
-/* ---------- 学习卡 ---------- */
-.ses{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding-bottom:104px}
-.ses-hd{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line2);padding:12px 16px 0}
-.ses-hd .r1{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)}
-.dirsw{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--card)}
-.dirsw button{font-size:11.5px;line-height:24px;padding:0 9px;color:var(--muted);letter-spacing:.2px;white-space:nowrap}
-.dirsw button+button{border-left:1px solid var(--line2)}
-.dirsw button.on{background:var(--ink);color:#faf7ef}
-.xbtn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;margin-left:-6px;color:var(--ink2);font-size:20px;line-height:1}
-.ses-bar{height:3px;background:var(--line2);margin-top:9px;overflow:hidden}
-.ses-bar i{display:block;height:100%;background:var(--ink);transition:width .2s}
-.ses-body{flex:1;display:flex;flex-direction:column;padding:0 18px}
-.qtag{font-size:11px;letter-spacing:.6px;color:var(--muted);margin-bottom:14px}
-.qtag b{color:var(--red);font-weight:600}
-
-.q-en{
-  font-family:Georgia,"Times New Roman","Songti SC",serif;
-  font-size:19px;line-height:1.62;letter-spacing:.2px;color:var(--ink);
-  word-break:break-word;
-}
-.q-en.long{font-size:17px;line-height:1.62}
-.q-zh{font-size:17px;line-height:1.7;color:var(--ink)}
-.ph{color:var(--red);font-style:normal;border-bottom:1px dashed rgba(162,53,42,.35);white-space:nowrap}
-
-.ans{margin-top:22px;padding-top:16px;border-top:1px dashed var(--line)}
-.ans .lbl{font-size:11px;letter-spacing:.5px;color:var(--muted);margin-bottom:6px}
-.tip{margin-top:14px;padding:11px 12px;background:#faf6ea;border:1px solid var(--line2);border-radius:8px;font-size:12.5px;line-height:1.65;color:var(--ink2)}
-.tip b{color:var(--red);font-weight:600}
-.src{display:inline-block;font-size:10.5px;color:var(--muted);margin-top:10px;letter-spacing:.3px}
-
-.idle{font-size:13px;color:var(--muted);text-align:center;padding:7px 0}
-
-/* 答题输入 */
-.wr{margin-top:16px}
-.wr textarea{
-  width:100%;min-height:96px;padding:12px;border:1px solid var(--line);border-radius:8px;
-  background:var(--card);font-family:Georgia,"Times New Roman",serif;font-size:16px;line-height:1.6;resize:vertical;
-}
-.wr textarea:focus{outline:none;border-color:#b9ae97}
-.hintrow{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12px;color:var(--muted)}
-.score{font-size:13px;margin:14px 0 6px}
-.score b{font-size:17px;font-variant-numeric:tabular-nums}
-.score .ok{color:var(--green)}
-.score .mid{color:var(--amber)}
-.score .no{color:var(--red)}
-.miss{color:var(--red);border-bottom:1px solid rgba(162,53,42,.5)}
-.opt{
-  display:block;width:100%;text-align:left;padding:12px 13px;border:1px solid var(--line);border-radius:8px;
-  background:var(--card);margin-bottom:8px;font-family:Georgia,"Times New Roman",serif;font-size:15px;line-height:1.5;
-}
-.opt:active{background:#f0ebde}
-.opt.right{border-color:#a9c6b8;background:var(--green-w)}
-.opt.wrong{border-color:#dfbcb3;background:var(--red-w)}
-
-/* 底部操作条 */
-.act{
-  position:fixed;left:0;right:0;bottom:0;z-index:30;
-  max-width:560px;margin:0 auto;padding:10px 16px calc(12px + env(safe-area-inset-bottom));
-  background:linear-gradient(to bottom,rgba(244,241,232,.82),var(--paper) 40%);
-  border-top:1px solid var(--line2);
-}
-.grade{display:flex;gap:8px}
-.grade button{
-  flex:1;height:50px;border-radius:9px;border:1px solid;font-size:14px;font-weight:600;letter-spacing:.3px;
-}
-.grade .g0{border-color:#dfbcb3;color:var(--red);background:var(--red-w)}
-.grade .g1{border-color:#e2d3b1;color:var(--amber);background:var(--amber-w)}
-.grade .g2{border-color:#aec9bb;color:var(--green);background:var(--green-w)}
-.grade button:active{filter:brightness(.97)}
-.act .row2{display:flex;gap:10px}
-.act .row2 .btn{flex:1}
-
-/* 底部导航 */
-.nav{
-  position:fixed;left:0;right:0;bottom:0;z-index:40;max-width:560px;margin:0 auto;
-  display:flex;background:var(--card);border-top:1px solid var(--line);
-  padding-bottom:env(safe-area-inset-bottom);
-}
-.nav a{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  height:54px;font-size:12.5px;color:var(--muted);text-decoration:none;letter-spacing:.4px;
-}
-.nav a b{font-weight:500}
-.nav a.on{color:var(--ink);font-weight:600}
-.nav a.on b{position:relative}
-.nav a.on b:after{content:"";position:absolute;left:50%;bottom:-6px;width:16px;height:2px;background:var(--red);transform:translateX(-50%)}
-
-/* 统计 */
-.stat2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat2 .panel{padding:13px 14px}
-.stat2 .lab{font-size:11.5px;color:var(--muted);letter-spacing:.3px}
-.stat2 .val{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:2px}
-.stat2 .val small{font-size:12px;color:var(--muted);font-weight:400;margin-left:2px}
-.heat{display:flex;gap:4px;margin-top:4px}
-.heat .c{flex:1;height:26px;border-radius:3px;background:var(--line2)}
-.heat .c.l1{background:#cfe0d5}.heat .c.l2{background:#9dbfae}.heat .c.l3{background:#5f8b79}.heat .c.l4{background:var(--green)}
-.heat-x{display:flex;gap:4px;margin-top:5px;font-size:9.5px;color:var(--muted)}
-.heat-x span{flex:1;text-align:center;font-variant-numeric:tabular-nums}
-.bars{margin-top:6px}
-.bars .b{display:flex;align-items:center;gap:10px;margin-bottom:9px}
-.bars .b .lb{width:78px;font-size:12px;color:var(--ink2);flex:0 0 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bars .b .bb{flex:1;height:8px;background:var(--line2);border-radius:4px;overflow:hidden}
-.bars .b .bb i{display:block;height:100%;background:var(--green)}
-.bars .b .vv{width:52px;text-align:right;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto}
-.empty{text-align:center;color:var(--muted);font-size:13px;padding:30px 0}
-
-/* 表单 */
-.field{margin-bottom:12px}
-.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;letter-spacing:.3px}
-.field input,.field textarea,.field select{
-  width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:15px;
-}
-.field input:focus,.field textarea:focus{outline:none;border-color:#b9ae97}
-.note{font-size:12px;color:var(--muted);line-height:1.7}
-.note b{color:var(--ink2)}
-.hr{height:1px;background:var(--line2);margin:18px 0}
-.kv{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line2);font-size:13.5px}
-.kv:last-child{border-bottom:0}
-.kv span{color:var(--muted);flex:0 0 auto}
-.kv b{font-weight:500;text-align:right}
-
-/* 吐司 */
-.toast{
-  position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(8px);
-  background:rgba(31,29,26,.92);color:#f7f3e9;font-size:13px;padding:9px 14px;border-radius:6px;
-  opacity:0;pointer-events:none;transition:.22s;z-index:60;max-width:80%;text-align:center;
-}
-.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-.sum{text-align:center;padding:26px 18px}
-.sum .ring{font-size:44px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
-.sum .sub{font-size:12px;color:var(--muted);letter-spacing:.6px}
-.sum .st3{display:flex;justify-content:center;gap:26px;margin:22px 0}
-.sum .st3 div{font-size:11px;color:var(--muted)}
-.sum .st3 b{display:block;font-size:19px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
-
-.ses-inner{margin-top:clamp(56px,15vh,150px);margin-bottom:auto;padding:6px 0 10px}
-.secbtn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:15px 0 13px;border-bottom:1px solid var(--line2)}
-.secbtn .t{flex:1;min-width:0}
-.secbtn .t b{display:block;font-size:15px;font-weight:600}
-.secbtn .t small{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
-.secbtn .c{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
-.glist.sub{margin-left:2px;padding-left:12px;border-left:2px solid var(--line2)}
-.glist.sub .grow .gt b{font-size:14px;font-weight:500}
-
-</style>
+<title>考研英语大作文背诵</title>
+<!-- ---------- 装到主屏 / 独立窗口运行 ---------- -->
+<meta name="apple-mobile-web-app-title" content="大作文背诵">
+<meta name="application-name" content="大作文背诵">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<meta name="color-scheme" content="light">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="https://aka.doubaocdn.com/s/3ZR4PRKFCI">
+<link rel="apple-touch-icon" sizes="167x167" href="https://aka.doubaocdn.com/s/3ZR4PRKFCI">
+<link rel="apple-touch-icon" sizes="152x152" href="https://aka.doubaocdn.com/s/3ZR4PRKFCI">
+<link rel="apple-touch-icon" sizes="120x120" href="https://aka.doubaocdn.com/s/3ZR4PRKFCI">
+<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="https://aka.doubaocdn.com/s/Tv9Cl6QYrK">
+<link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" href="https://aka.doubaocdn.com/s/AOwlTpVMhv">
+<link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="https://aka.doubaocdn.com/s/VJ7w9QbIJS">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="https://aka.doubaocdn.com/s/3PTy2zwRsv">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="https://aka.doubaocdn.com/s/nyU98EunBc">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="https://aka.doubaocdn.com/s/c5javqaC2J">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="splash" role="presentation">
+  <div class="sp-mark">
+    <span style="width:96px;background:#a2352a"></span>
+    <span style="width:86px;background:#1f1d1a"></span>
+    <span style="width:66px;background:#6e675c"></span>
+  </div>
+  <div class="sp-t">考研英语大作文</div>
+  <div class="sp-r"></div>
+  <div class="sp-s">背诵程序 · 299 张卡 · 六大方面</div>
+  <div class="sp-dot"><i></i><i></i><i></i></div>
+</div>
+<script>
+(function () {
+  var sp = document.getElementById('splash');
+  if (!sp) return;
+  var done = false, t0 = Date.now();
+  function hide() {
+    if (done) return;
+    var wait = 640 - (Date.now() - t0);          // 至少停留 0.64s，避免一闪而过
+    if (wait > 0) return setTimeout(hide, wait);
+    done = true;
+    sp.className = 'gone';
+    setTimeout(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 380);
+  }
+  window.__hideSplash = hide;
+  function arm() {
+    var app = document.getElementById('app');
+    if (!app) return setTimeout(arm, 60);
+    if (app.children.length) { hide(); return; }
+    if (window.MutationObserver) {
+      var ob = new MutationObserver(function () {
+        if (app.children.length) { ob.disconnect(); hide(); }
+      });
+      ob.observe(app, { childList: true, subtree: true });
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arm);
+  else arm();
+  setTimeout(hide, 7000);
+})();
+</script>
 <div id="app"></div>
 <div id="toast" class="toast"></div>
-<script>window.__DATA__={"groups":[{"id":"g_soc","sec":1,"title":"社会方面","sub":"最常用 · 核心是发展 / 方式是经济 / 特征是服务 / 目标是和谐"},{"id":"g_per","sec":1,"title":"个人方面","sub":"最常用 · 核心是成长 / 基础是健康 / 方式是学习 / 目标是实现"},{"id":"g_nat","sec":1,"title":"自然方面","sub":"考得少 · 核心是持续 / 方式是保护 / 目标是和谐"},{"id":"g_cul","sec":1,"title":"文化方面","sub":"考得少 · 核心是传承 / 方式是交流 / 态度是包容 / 目标是繁荣"},{"id":"g_com","sec":1,"title":"交流方面","sub":"核心是沟通 / 方式是连接 / 目标是和谐"},{"id":"g_tech","sec":1,"title":"科技方面","sub":"核心是创新 / 方式是转型 / 目标是赋能"},{"id":"p1_overall","sec":2,"title":"图表第一段 · 总体描述","sub":"第 1 句：先判题型，再取句。定语从句最稳，不挑主题词词性"},{"id":"p1_detail","sec":2,"title":"图表第一段 · 细节描述","sub":"第 2 句：动态三公式、静态两公式，数据配动词"},{"id":"p1_phen","sec":2,"title":"图表第一段 · 社会现象","sub":"第 3 句：过渡句 + 现象方案，收尾用"},{"id":"p2","sec":2,"title":"通用第二段 · 三点原因","sub":"图表/图画/文字完全通用，固定「举例→说理→群众」"},{"id":"p3","sec":2,"title":"通用第三段 · 总结+措施+畅想","sub":"三个功能句一段，措施必须回扣痛点"},{"id":"p4_pic","sec":2,"title":"图画第一段 · 描述+主题阐述","sub":"把场景说成「某事很重要」，一句描述 + 一句阐述"},{"id":"p5_txt","sec":2,"title":"文字第一段 · 改写+表态","sub":"改写现象、改写观点、表明态度，三句不可省"},{"id":"p6_page","sec":2,"title":"一页纸速查（整段默写）","sub":"三段骨架连起来默写，考场就是这个模样"},{"id":"v_inc","sec":3,"title":"增加","sub":"数据往上走，8 个动词按强度从弱到强记"},{"id":"v_dec","sec":3,"title":"减少","sub":"数据往下走，6 个动词"},{"id":"v_flat","sec":3,"title":"持平","sub":"没变化、原地不动"},{"id":"v_fluct","sec":3,"title":"波动","sub":"有升有降、来回起落"},{"id":"v_fast","sec":3,"title":"迅速地","sub":"幅度大、斜率陡"},{"id":"v_slow","sec":3,"title":"缓慢地","sub":"幅度小、斜率缓"},{"id":"v_occupy","sec":3,"title":"占","sub":"占比、构成"},{"id":"v_ratio","sec":3,"title":"比例","sub":"占比用前三，对比才用 ratio"},{"id":"v_peak","sec":3,"title":"峰值","sub":"最高点"},{"id":"v_trough","sec":3,"title":"谷值","sub":"最低点"},{"id":"v_time","sec":3,"title":"时间","sub":"区间怎么起头"},{"id":"v_mult","sec":3,"title":"倍数与比较","sub":"翻倍、几倍、远超、增到 vs 增了"},{"id":"v_rank","sec":3,"title":"排序","sub":"居首、紧随其后、最大份额"},{"id":"v_approx","sec":3,"title":"约数","sub":"大约、略高、略低"},{"id":"v_present","sec":3,"title":"图表呈现","sub":"总起句的两种开头"},{"id":"v_contrast","sec":3,"title":"对比衔接","sub":"一升一降怎么连"},{"id":"v_trendnp","sec":3,"title":"趋势名词短语","sub":"时间作主语，句子立刻高级"},{"id":"r_cause","sec":4,"title":"原因过渡句 · 逐词替换","sub":"把俗句 There are many reasons to explain my idea 换成考官腔"},{"id":"r_link","sec":4,"title":"连接词 · 五组","sub":"背一组用到底，别换来换去"},{"id":"r_phrase","sec":4,"title":"例证短语 · 四类","sub":"原因 1 举例时，主语的「态度动词」从这里挑"},{"id":"r_which","sec":4,"title":"which 从句与例证开头","sub":"好处怎么写、动词怎么换"},{"id":"r_clause","sec":4,"title":"从句开头 · 13 句","sub":"主语从句 / 宾语从句 / 同位语从句，拉长句子用"},{"id":"r_colloc","sec":4,"title":"常用短语 · 起关键作用","sub":"主题词和某方面之间的动词，全在这里"},{"id":"r_measure","sec":4,"title":"措施 · 五个角度","sub":"政府 / 公民 / 个人 / 媒体 / 家庭"},{"id":"r_sum","sec":4,"title":"总结开头 · 五个","sub":"All in all 之外还有四个"},{"id":"r_picintro","sec":4,"title":"图画引入 · 逐词替换","sub":"shown / vividly / picture 各有同族"},{"id":"r_theme","sec":4,"title":"主题阐述 · 逐词替换","sub":"is to / purpose / remind / us 四组"},{"id":"r_center","sec":4,"title":"中心思想 · 逐词替换","sub":"important 和 problem 的同族"},{"id":"r_adj","sec":4,"title":"人物形容词 · as well as","sub":"正面 7 组、负面 6 组"},{"id":"r_meta","sec":4,"title":"比喻意象 · 话题适配","sub":"哪类话题配哪个意象"},{"id":"r_dispute","sec":4,"title":"争议话题 · 过渡句","sub":"要正反论证时才用"},{"id":"r_detail","sec":4,"title":"图画细节 · 八条","sub":"with 细节可直接抄"},{"id":"r_elem","sec":4,"title":"图画要素词 · 动作与环境","sub":"基本动作 / 主要动作 / 万能环境"}],"cards":[]};</script>
+<script src="data-g.js"></script>
 <script src="data-a.js"></script>
 <script src="data-b1.js"></script>
 <script src="data-b2.js"></script>
