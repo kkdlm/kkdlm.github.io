@@ -98,8 +98,8 @@
       '<div class="chips">' + [10, 20, 25, 30, 40].map(function (x) {
         return '<button class="tag ' + (S.set.newPerDay === x ? 'on' : '') + '" data-act="setn" data-arg="' + x + '">' + x + '</button>';
       }).join('') + '</div></div>';
-    h += '<div class="field"><label>默认模式</label>' +
-      '<div class="chips">' + [{ v: 'auto', t: '自动（新卡认词，老卡回想）' }, { v: 'en2zh', t: '认词' }, { v: 'zh2en', t: '回想' }].map(function (x) {
+    h += '<div class="field"><label>默认背诵方向（卡面上也可随时切换）</label>' +
+      '<div class="chips">' + [{ v: 'auto', t: '自动（新卡英→中，老卡中→英）' }, { v: 'en2zh', t: '只英→中' }, { v: 'zh2en', t: '只中→英' }].map(function (x) {
         return '<button class="tag ' + (S.set.mode === x.v ? 'on' : '') + '" data-act="setmode" data-arg="' + x.v + '">' + x.t + '</button>';
       }).join('') + '</div></div>';
     h += '<div class="field"><label>考试日</label><input id="exam" type="date" value="' + S.set.exam + '"></div>';
@@ -235,6 +235,13 @@
       beginSession([c], { label: '单张', force: null });
     },
     reveal: function () { SES.rev = true; render(); },
+    dir: function (a) {
+      if (!SES || (a !== 'zh2en' && a !== 'en2zh')) return;
+      if (SES.dir === a) return;
+      SES.dir = a;
+      resetCardUI();
+      render();
+    },
     hint: function () {
       var c = SES.q[SES.i];
       var first = c.en.split(' ').slice(0, 2).join(' ');
@@ -270,7 +277,7 @@
       SES.q.forEach(function (c) { if (lvOf(c.id) <= 2) ids[c.id] = 1; });
       var wrong = allCards().filter(function (c) { return ids[c.id]; });
       if (!wrong.length) { toast('本轮没有需要重来的'); SES = null; location.hash = '#/'; return; }
-      beginSession(wrong.slice(0, 40), { label: '重来' });
+      beginSession(wrong.slice(0, 40), { label: '重来', dir: SES.dir });
     },
     tsec: function (a) { T.sec = parseInt(a, 10); render(); },
     tmode: function (a) { T.mode = a; render(); },
