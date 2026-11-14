@@ -11,8 +11,16 @@
     for (i = 0; i < n; i++) u[i] = bin.charCodeAt(i);
     return u;
   }
+  /* 补充库的逐词中文表：程序包里只有主库的 GT，这里把增量补进去（取不到就跳过） */
+  function patchGT(t) {
+    var x = window.__GTX__;
+    if (!x) return t;
+    var add = 'Object.keys(window.__GTX__||{}).forEach(function(k){GT[k]=window.__GTX__[k];});';
+    var re = /(var GT = \{[\s\S]*?\};\n)/;
+    return re.test(t) ? t.replace(re, function (m) { return m + '  ' + add + '\n'; }) : t + '\n' + add + ';\n';
+  }
   function run(text) {
-    try { new Function(text)(); }
+    try { new Function(patchGT(text))(); }
     catch (e) { fail('程序执行失败：' + (e && e.message ? e.message : e)); }
   }
   var MAXP = 8, idx = 1, acc = [], v = Date.now();
