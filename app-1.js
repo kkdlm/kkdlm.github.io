@@ -201,20 +201,21 @@
   }
 
   function beginSession(q, meta) {
-    SES = { q: q.slice(), i: 0, right: 0, mid: 0, wrong: 0, req: {}, force: meta.force || null, label: meta.label || '', g: meta.g || null, rev: false, inp: '', res: null, sel: -1, opts: null, start: Date.now() };
+    SES = { q: q.slice(), i: 0, right: 0, mid: 0, wrong: 0, req: {}, force: meta.force || null, dir: meta.dir || null, label: meta.label || '', g: meta.g || null, rev: false, inp: '', res: null, sel: -1, opts: null, start: Date.now() };
     location.hash = '#/s';
     render();
   }
 
   function modeOf(c) {
     if (SES && SES.force) return SES.force;
+    if (SES && SES.dir) return SES.dir;
     var lv = lvOf(c.id);
     if (c.alts && c.alts.length > 1) return lv >= 2 ? 'zh2en' : 'en2zh';
     if (S.set.mode === 'auto') return lv >= 2 ? 'zh2en' : 'en2zh';
     return S.set.mode;
   }
 
-  var MODENAME = { en2zh: '认词 · 英→中', zh2en: '回想 · 中→英', write: '默写 · 打字', mc: '选择 · 四选一' };
+  var MODENAME = { en2zh: '英→中 · 认词', zh2en: '中→英 · 回想', write: '默写 · 打字', mc: '选择 · 四选一' };
 
   function resetCardUI() {
     if (!SES) return;
@@ -456,10 +457,17 @@
     var g = groupById(c.g);
     var pct = Math.round(SES.i / n * 100);
     var h = '<div class="ses">';
+    var dirSw = '';
+    if (m === 'en2zh' || m === 'zh2en') {
+      dirSw = '<span class="dirsw">' +
+        '<button class="' + (m === 'en2zh' ? 'on' : '') + '" data-act="dir" data-arg="en2zh">英→中</button>' +
+        '<button class="' + (m === 'zh2en' ? 'on' : '') + '" data-act="dir" data-arg="zh2en">中→英</button>' +
+        '</span>';
+    }
     h += '<div class="ses-hd"><div class="r1">' +
       '<button class="xbtn" data-act="quit">×</button>' +
       '<span class="num">' + (SES.i + 1) + ' / ' + n + '</span>' +
-      '<span>' + esc(MODENAME[m]) + '</span></div>' +
+      (dirSw || ('<span>' + esc(MODENAME[m]) + '</span>')) + '</div>' +
       '<div class="ses-bar"><i style="width:' + pct + '%"></i></div></div>';
 
     h += '<div class="ses-body"><div class="ses-inner">';
