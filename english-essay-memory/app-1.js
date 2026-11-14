@@ -25,7 +25,27 @@
     try { new Function(patchGT(text))(); }
     catch (e) { fail('程序执行失败：' + (e && e.message ? e.message : e)); }
   }
-  /* 先加载补充库（extra.txt）：取不到也不影响主程序使用 */
+  /* 取一个 gz+base64 的小包并执行其中的脚本；取不到就跳过 */
+  function loadPack(name, then) {
+    var y = new XMLHttpRequest();
+    y.open('GET', name + '?v=' + Date.now(), true);
+    y.onload = function () {
+      try {
+        if (y.status < 400 && y.responseText) {
+          var st = new Blob([b64ToBytes(y.responseText)]).stream().pipeThrough(new DecompressionStream('gzip'));
+          new Response(st).text().then(function (t) {
+            try { new Function(t)(); } catch (e) { console.warn(name + ' 解析失败：' + (e && e.message ? e.message : e)); }
+            then();
+          }, then);
+          return;
+        }
+      } catch (e) { }
+      then();
+    };
+    y.onerror = then;
+    y.send();
+  }
+  /* 先加载补充库（extra.txt）与隐藏清单（hide.txt）：取不到也不影响主程序使用 */
   function loadExtra(cb) {
     var y = new XMLHttpRequest();
     y.open('GET', 'extra.txt?v=' + Date.now(), true);
@@ -44,7 +64,16 @@
     y.onerror = function () { after(); };
     y.send();
     function after() {
-      var d = window.__DATA__ || {};
+      loadPack('hide.txt', trim);
+    }
+    function trim() {
+      /* 模板句裁剪：把清单里多余的那几张从数据里摘掉，再交给程序 */
+      var h = window.__HIDE__ || [], d = window.__DATA__ || {};
+      if (h.length && d.cards) {
+        var m = {};
+        h.forEach(function (i) { m[i] = 1; });
+        d.cards = d.cards.filter(function (c) { return !m[c.id]; });
+      }
       var n = (d.cards || []).length, el = document.querySelector('.sp-s');
       if (n && el) el.textContent = '背诵程序 · ' + n + ' 张卡 · 六大方面';
       cb();
