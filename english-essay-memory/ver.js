@@ -1,9 +1,9 @@
 /* ---------- 版本与更新（由 build/mk_ver.py 生成） ---------- */
 (function () {
   'use strict';
-  var VER = '1.0.0', VDATE = '2026-11-14', VLOGS = [{"v":"1.0.0","d":"2026-11-14","t":"模板句收口 + 更新系统","items":["第二、第一段模板句从 114 句收到 54 句：主背全留，每组只再留 2~3 句备用，全站 326 → 266 张卡 / 50 组","一页纸速查 5 张、六大方面 132 条、图表词汇 19 条、替换词 61 组不动","新增更新系统：打开自动比对线上版本，有新版本时底部弹「立即更新」，点一下换到新版","首次打开后缓存一份到本机，之后离线也能开；「我的 → 关于」里有版本号、检查更新、更新记录"]},{"v":"0.9.0","d":"2026-11-14","t":"图标与启动图换成粟线 E","items":["主屏图标由三根圆角条换成红底米白衬线 E（180 / 192 / 512 三档）","iOS 系统启动图 6 个尺寸按同一枚徽标重做，打开不再先闪旧三条杠","PWA 启动画面里的标志同步换成 E 字方块"]},{"v":"0.8.0","d":"2026-11-14","t":"按主模板补齐内容","items":["逐页比对两份 PDF：六大方面 132 条齐全，模板句、图表词汇、替换词补了 27 张主模板独有的卡","替换词不再整排铺一屏：一组只出一个说法，给骨架句、挖空自己填，整组按最差的那个排期","中→英 / 英→中 双向可切，逐词背带中文骨架"]}];
+  var VER = '1.1.0', VDATE = '2026-11-14', VLOGS = [{"v":"1.1.0","d":"2026-11-14","t":"版本入口搬进「我的」页","items":["「我的」页单独开一块「版本」：一行「版本记录 N 条 · 当前 v1.1.0」，一行「检查新版本」手动查一次","更新过的第二天再打开，顶部会提示「已更新至 v1.1.0」，点一下直接看这次改了什么","网页版加了缓存 worker：第二次打开先读本机缓存、后台静默拉新版；离线单文件也带同一套版本信息"]},{"v":"1.0.0","d":"2026-11-14","t":"模板句收口 + 更新系统","items":["第二、第一段模板句从 114 句收到 54 句：主背全留，每组只再留 2~3 句备用，全站 326 → 266 张卡 / 50 组","一页纸速查 5 张、六大方面 132 条、图表词汇 19 条、替换词 61 组不动","新增更新系统：打开自动比对线上版本，有新版本时底部弹「立即更新」，点一下换到新版","首次打开后缓存一份到本机，之后离线也能开；「我的 → 关于」里有版本号、检查更新、更新记录"]},{"v":"0.9.0","d":"2026-11-14","t":"图标与启动图换成衬线 E","items":["主屏图标由三根圆角条换成红底米白衬线 E（180 / 192 / 512 三档）","iOS 系统启动图 6 个尺寸按同一枚徽标重做，打开不再先闪旧三条杠","PWA 启动画面里的标志同步换成 E 字方块"]},{"v":"0.8.0","d":"2026-11-14","t":"按主模板补齐内容","items":["逐页比对两份 PDF：六大方面 132 条齐全，模板句、图表词汇、替换词补了 27 张主模板独有的卡","替换词不再整排铺一屏：一组只出一个说法，给骨架句、挖空自己填，整组按最差的那个排期","中→英 / 英→中 双向可切，逐词背带中文骨架"]}];
   var KVER = 'eem:ver';
-  window.VER = VER; window.VERDATE = VDATE;
+  window.VER = VER; window.VERDATE = VDATE; window.__VERLOG = VLOGS;
 
   /* ---- 底部更新条 ---- */
   var CSS = '' +
@@ -128,6 +128,38 @@
     var bootAt = Date.now();
     window.__verBootAt = bootAt;
   }
+
+  /* 「我的」页补一块「版本」（跟法制史那个一样）：
+     网页版的程序包里没有这个入口，这里在渲染后挂上去；程序包自带入口时就不重复挂。 */
+  function mountVerPanel() {
+    if (location.hash !== '#/mine') return;
+    if (document.querySelector('[data-act="checkver"]')) return;
+    var wrap = document.querySelector('#app .wrap');
+    if (!wrap || wrap.querySelector('#verpanel')) return;
+    var secs = wrap.querySelectorAll('.sec-t'), anchor = null, i;
+    for (i = 0; i < secs.length; i++) {
+      if (secs[i].textContent.indexOf('关于') >= 0) { anchor = secs[i]; break; }
+    }
+    var box = document.createElement('div');
+    box.id = 'verpanel';
+    box.innerHTML =
+      '<div class="sec-t"><h2>版本</h2><span>当前 v' + VER + ' · ' + VDATE + '</span></div>' +
+      '<div class="panel" style="padding:4px 14px"><div class="glist">' +
+        '<button class="grow" data-ver="log"><div class="gt"><b>版本记录</b><small>' +
+          VLOGS.length + ' 条 · 最新 v' + (VLOGS[0] ? VLOGS[0].v : VER) + '</small></div><div class="gp">看</div></button>' +
+        '<button class="grow" data-ver="chk"><div class="gt"><b>检查新版本</b><small>手动比对一次线上版本</small></div><div class="gp">查</div></button>' +
+      '</div></div>';
+    if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(box, anchor);
+    else wrap.appendChild(box);
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-ver]');
+      if (!b) return;
+      e.preventDefault(); e.stopPropagation();
+      if (b.getAttribute('data-ver') === 'log') window.showVerLog(); else check(true);
+    });
+  }
+  document.addEventListener('hashchange', function () { setTimeout(mountVerPanel, 120); });
+  setTimeout(mountVerPanel, 700);
 
   /* 离线缓存：注册失败不影响使用 */
   try {
