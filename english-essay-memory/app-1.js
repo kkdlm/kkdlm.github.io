@@ -23,6 +23,31 @@
     try { new Function(patchGT(text))(); }
     catch (e) { fail('程序执行失败：' + (e && e.message ? e.message : e)); }
   }
+  /* 先加载补充库（extra.txt）：取不到也不影响主程序使用 */
+  function loadExtra(cb) {
+    var y = new XMLHttpRequest();
+    y.open('GET', 'extra.txt?v=' + Date.now(), true);
+    y.onload = function () {
+      var ok = y.status < 400 && y.responseText;
+      try {
+        if (ok) {
+          var s = new Blob([b64ToBytes(y.responseText)]).stream().pipeThrough(new DecompressionStream('gzip'));
+          new Response(s).text().then(function (t) {
+            try { new Function(t)(); } catch (e) { console.warn('补充库解析失败：' + (e && e.message ? e.message : e)); }
+            after();
+          }, after);
+        } else { after(); }
+      } catch (e) { after(); }
+    };
+    y.onerror = function () { after(); };
+    y.send();
+    function after() {
+      var d = window.__DATA__ || {};
+      var n = (d.cards || []).length, el = document.querySelector('.sp-s');
+      if (n && el) el.textContent = '背诵程序 · ' + n + ' 张卡 · 六大方面';
+      cb();
+    }
+  }
   var MAXP = 8, idx = 1, acc = [], v = Date.now();
   function finish() {
     if (!acc.length) { fail('取不到程序包，请连网后刷新'); return; }
@@ -44,5 +69,5 @@
     };
     x.send();
   }
-  step();
+  loadExtra(step);
 })();
