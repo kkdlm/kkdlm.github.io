@@ -6,7 +6,9 @@
     try { console.error(msg); } catch (e) { }
   }
   function b64ToBytes(b64) {
-    var bin = atob(String(b64).replace(/[^A-Za-z0-9+/=]/g, ''));
+    var s = String(b64).replace(/[^A-Za-z0-9+/=]/g, '');
+    while (s.length % 4) s += '=';                 /* 补齐 base64 填充，传丢了也能解 */
+    var bin = atob(s);
     var n = bin.length, u = new Uint8Array(n), i;
     for (i = 0; i < n; i++) u[i] = bin.charCodeAt(i);
     return u;
