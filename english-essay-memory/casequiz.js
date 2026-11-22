@@ -51,7 +51,7 @@
       if (!m) continue;
       a.push({
         id: k, q: u.q || '', eg: u.eg || '', zh: u.egzh || '',
-        y: m[1], lab: m[1] + ' ' + m[2],
+        y: m[1], vol: m[2], lab: m[1] + ' ' + m[2],
         sec: k.indexOf('e_') === 0 ? '小作文' : '大作文',
         gr: groupTitle((function (c) { return c && c.g; })(cardOf(k)))
       });
@@ -82,14 +82,27 @@
     box.querySelector('.x').onclick = close;
     box.onclick = function (e) { if (e.target === box) close(); };
 
+    /* 三个干扰项刻意错开：同年另一卷、邻年同卷、换年换卷——年份和卷别都得分开记，
+       不能出现四个选项卷别全一样、等于只考年份的情况 */
     function opts4(t) {
-      var others = shuffle(labs.filter(function (l) { return l !== t.lab; }).slice());
-      /* 干扰项优先取同年前后三年的卷别，像一点，别一眼就能排除 */
-      var near = others.filter(function (l) { return Math.abs(Number(l.slice(0, 4)) - Number(t.y)) <= 3; });
-      var far = others.filter(function (l) { return Math.abs(Number(l.slice(0, 4)) - Number(t.y)) > 3; });
-      var sel = near.slice(0, 3);
-      if (sel.length < 3) sel = sel.concat(far.slice(0, 3 - sel.length));
-      return shuffle(sel.concat([t.lab]));
+      var want = [], seen = {};
+      function take(list, n) {
+        for (var i = 0; i < list.length && n > 0; i++) {
+          var e = list[i];
+          if (seen[e.lab] || e.lab === t.lab) continue;
+          want.push(e.lab); seen[e.lab] = 1; n--;
+        }
+      }
+      var dy = function (x) { return Math.abs(Number(x.y) - Number(t.y)); };
+      var oth = shuffle(all.filter(function (x) { return x.lab !== t.lab; }));
+      take(oth.filter(function (x) { return x.y === t.y && x.vol !== t.vol; }), 1);
+      /* 老年份可能只出过一卷：那也硬塞一个另一卷的选项，别让卷别那半题白送 */
+      if (!want.length) take(oth.filter(function (x) { return x.vol !== t.vol; }), 1);
+      take(oth.filter(function (x) { return dy(x) <= 3 && x.vol === t.vol; }), 1);
+      take(oth.filter(function (x) { return dy(x) <= 3 && x.vol !== t.vol; }), 1);
+      if (want.length < 3) take(oth.filter(function (x) { return x.vol === t.vol; }), 3 - want.length);
+      if (want.length < 3) take(oth, 3 - want.length);
+      return shuffle(want.concat([t.lab]));
     }
 
     function question() {
