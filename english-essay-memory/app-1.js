@@ -76,7 +76,40 @@
       }
       var n = (d.cards || []).length, el = document.querySelector('.sp-s');
       if (n && el) el.textContent = '背诵程序 · ' + n + ' 张卡 · 大作文 + 小作文';
-      cb();
+      applyCase(cb);
+    }
+  }
+  /* 真题补丁：case-1/2.json 里是每张卡的「真题 · 什么时候用」，贴到卡面 tip 上 */
+  function applyCase(next) {
+    var parts = ['case-1.json', 'case-2.json'], got = 0, all = [];
+    parts.forEach(function (p, i) {
+      var y = new XMLHttpRequest();
+      y.open('GET', p + '?v=' + Date.now(), true);
+      y.onload = function () {
+        try { if (y.status < 400 && y.responseText) all[i] = JSON.parse(y.responseText); } catch (e) { }
+        if (++got === parts.length) run();
+      };
+      y.onerror = function () { if (++got === parts.length) run(); };
+      y.send();
+    });
+    function run() {
+      var m = {}, d = window.__DATA__ || {}, n = 0, k;
+      all.forEach(function (o) { if (o) for (k in o) if (o.hasOwnProperty(k)) m[k] = o[k]; });
+      (d.cards || []).forEach(function (c) {
+        var u = m[c.id];
+        if (!u) return;
+        var add = '▍真题 · 什么时候用\n' + (u.q ? u.q + '\n' : '') + (u.eg ? u.eg + '\n' : '') + (u.egzh ? '译：' + u.egzh : '');
+        add = add.replace(/\s+$/, '');
+        if (!c.tip) c.tip = add;
+        else if (c.tip.indexOf('真题 · 什么时候用') < 0) c.tip = c.tip + '\n' + add;
+        n++;
+      });
+      try {
+        var st = document.createElement('style');
+        st.textContent = '.tip{white-space:pre-line}';
+        document.head.appendChild(st);
+      } catch (e) { }
+      next();
     }
   }
   var MAXP = 8, idx = 1, acc = [], v = Date.now();
