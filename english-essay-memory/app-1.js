@@ -123,16 +123,25 @@
       } catch (e) { quiz(); }
       /* 真题自测（casequiz.js）：同样取不到就跳过，不影响背卡 */
       function quiz() {
-        try {
-          var q = new XMLHttpRequest();
-          q.open('GET', 'casequiz.js?v=' + Date.now(), true);
-          q.onload = function () {
-            try { if (q.status < 400 && q.responseText) new Function(q.responseText)(); } catch (e) { }
-            next();
-          };
-          q.onerror = function () { next(); };
-          q.send();
-        } catch (e) { next(); }
+        var q = new XMLHttpRequest();
+        q.open('GET', 'casequiz.js?v=' + Date.now(), true);
+        q.onload = function () {
+          try { if (q.status < 400 && q.responseText) new Function(q.responseText)(); } catch (e) { }
+          daily();
+        };
+        q.onerror = daily;
+        q.send();
+      }
+      /* 学习报告（casedaily.js）：同样取不到就跳过 */
+      function daily() {
+        var w = new XMLHttpRequest();
+        w.open('GET', 'casedaily.js?v=' + Date.now(), true);
+        w.onload = function () {
+          try { if (w.status < 400 && w.responseText) new Function(w.responseText)(); } catch (e) { }
+          next();
+        };
+        w.onerror = function () { next(); };
+        w.send();
       }
     }
   }
