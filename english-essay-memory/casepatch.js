@@ -188,9 +188,17 @@
       if (!b) return;
       e.preventDefault(); e.stopPropagation(); openIndex();
     });
-    var vp = wrap.querySelector('#verpanel');
-    if (vp && vp.parentNode) vp.parentNode.insertBefore(box, vp);
-    else wrap.appendChild(box);
+    /* 位置：放到「我的词条」之上，别沉到底部 */
+    var secs = wrap.querySelectorAll('.sec-t'), anchor = null;
+    for (var i = 0; i < secs.length; i++) {
+      if (secs[i].textContent.indexOf('我的词条') >= 0) { anchor = secs[i]; break; }
+    }
+    if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(box, anchor);
+    else {
+      var vp = wrap.querySelector('#verpanel');
+      if (vp && vp.parentNode) vp.parentNode.insertBefore(box, vp);
+      else wrap.appendChild(box);
+    }
   }
   function tick() {
     CM = window.__CASE__ || CM;
