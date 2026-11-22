@@ -140,16 +140,22 @@
     h += '</div><div class="note">最近 28 天，深色＝那天答得多；今天那一格带红框。</div></div>';
 
     /* 2. 近两周作答 */
-    var mx = 1;
+    var mx = 0;
     o.d14.forEach(function (x) { if (x.all > mx) mx = x.all; });
-    h += '<div class="blk"><div class="bt">近两周作答<span>柱高＝当天作答张数，最多 ' + mx + '</span></div><div class="chart">';
-    o.d14.forEach(function (x, i) {
-      var pct = Math.round(x.all / mx * 100);
-      /* 14 根柱子，标签隔一天给一个，末端给「今天」，避免挤成一团 */
-      var lbl = i === 13 ? '今天' : (i % 2 === 0 ? Number(x.k.slice(5, 7)) + '/' + Number(x.k.slice(8, 10)) : '');
-      h += '<div class="col"><i style="height:' + Math.max(1, pct) + '%' + (x.all ? '' : ';background:#ded5c8') + '"></i><b>' + lbl + '</b></div>';
-    });
-    h += '</div><div class="note">今天 ' + o.d14[13].all + ' 张，其中新学 ' + o.d14[13].n + ' 张；没作答的日子柱子只剩一道浅线。</div></div>';
+    h += '<div class="blk"><div class="bt">近两周作答<span>' + (mx ? '柱高＝当天作答张数，最多 ' + mx : '还没有记录') + '</span></div>';
+    if (mx) {
+      h += '<div class="chart">';
+      o.d14.forEach(function (x, i) {
+        var pct = Math.round(x.all / mx * 100);
+        /* 14 根柱子，标签隔一天给一个，末端给「今天」，避免挤成一团 */
+        var lbl = i === 13 ? '今天' : (i % 2 === 0 ? Number(x.k.slice(5, 7)) + '/' + Number(x.k.slice(8, 10)) : '');
+        h += '<div class="col"><i style="height:' + Math.max(1, pct) + '%' + (x.all ? '' : ';background:#ded5c8') + '"></i><b>' + lbl + '</b></div>';
+      });
+      h += '</div><div class="note">今天 ' + o.d14[13].all + ' 张，其中新学 ' + o.d14[13].n + ' 张；没作答的日子柱子只剩一道浅线。</div>';
+    } else {
+      h += '<div class="note">今天 ' + o.d14[13].all + ' 张。开始背之后，这里会按天统计作答量。</div>';
+    }
+    h += '</div>';
 
     /* 3. 记忆持久度 */
     h += '<div class="blk"><div class="bt">记忆持久度<span>背到 5 档以上算记牢，掉档就是忘了</span></div>';
@@ -166,17 +172,22 @@
     h += '</div><div class="note">记牢（lv5 以上）' + o.mastered + ' 张 / 全部 ' + o.total + ' 张，已开始背 ' + o.seen + ' 张。</div></div>';
 
     /* 4. 未来七天 */
-    var mx7 = 1;
+    var mx7 = 0;
     o.due7.forEach(function (x) { if (x > mx7) mx7 = x; });
-    h += '<div class="blk"><div class="bt">未来七天复习<span>按到期日排，今天含已过期的</span></div><div class="chart">';
-    var now = new Date();
-    for (var d = 0; d <= 6; d++) {
-      var dt = new Date(now.getTime() + d * DAY);
-      var lbl = d === 0 ? '今天' : (dt.getMonth() + 1) + '/' + dt.getDate();
-      h += '<div class="col"><i style="height:' + Math.max(1, Math.round(o.due7[d] / mx7 * 100)) + '%' +
-        (o.due7[d] ? '' : ';background:#ded5c8') + '"></i><b>' + lbl + '</b></div>';
+    h += '<div class="blk"><div class="bt">未来七天复习<span>按到期日排，今天含已过期的</span></div>';
+    if (mx7 > 0) {
+      h += '<div class="chart">';
+      var now = new Date();
+      for (var d = 0; d <= 6; d++) {
+        var dt = new Date(now.getTime() + d * DAY);
+        var lbl = d === 0 ? '今天' : (dt.getMonth() + 1) + '/' + dt.getDate();
+        h += '<div class="col"><i style="height:' + Math.max(1, Math.round(o.due7[d] / mx7 * 100)) + '%' +
+          (o.due7[d] ? '' : ';background:#ded5c8') + '"></i><b>' + lbl + '</b></div>';
+      }
+      h += '</div>';
     }
-    h += '</div><div class="note">今天到期 ' + o.dueToday + ' 张；明天 ' + o.due7[1] + ' 张、后天 ' + o.due7[2] + ' 张。到期多就先只做复习，不追新卡。</div></div>';
+    h += '<div class="note">今天到期 ' + o.dueToday + ' 张；明天 ' + o.due7[1] + ' 张、后天 ' + o.due7[2] + ' 张。' +
+      (o.dueToday + o.due7[1] + o.due7[2] ? '到期多就先只做复习，不追新卡。' : '还没开始背，所以没有排期。') + '</div></div>';
 
     bd.innerHTML = h;
   }
