@@ -138,10 +138,22 @@
         w.open('GET', 'casedaily.js?v=' + Date.now(), true);
         w.onload = function () {
           try { if (w.status < 400 && w.responseText) new Function(w.responseText)(); } catch (e) { }
-          next();
+          quota();
         };
-        w.onerror = function () { next(); };
+        w.onerror = function () { quota(); };
         w.send();
+      }
+      /* 每日张数自定义（casequota.js）：取不到就跳过；完事再把程序包的下载接上 */
+      function quota() {
+        var g = new XMLHttpRequest();
+        g.open('GET', 'casequota.js?v=' + Date.now(), true);
+        g.onload = function () {
+          try { if (g.status < 400 && g.responseText) new Function(g.responseText)(); } catch (e) { }
+          done();
+        };
+        g.onerror = done;
+        g.send();
+        function done() { try { if (typeof next === 'function') next(); } catch (e) { } }
       }
     }
   }
