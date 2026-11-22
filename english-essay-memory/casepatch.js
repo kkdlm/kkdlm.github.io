@@ -54,6 +54,7 @@
     '.cidx .sr{padding:0 16px 10px}' +
     '.cidx .sr input{width:100%;box-sizing:border-box;border:1px solid #e2dcd2;background:#fffdf8;border-radius:10px;padding:8px 11px;font-size:13px;color:#2b2320;outline:none;-webkit-appearance:none}' +
     '.cidx .it .z{font-size:12.5px;color:#7a6f61;line-height:1.7;margin-top:5px}' +
+    '.cidx .it .gr{font-size:11.5px;color:#a89c8b;line-height:1.6;margin-top:3px}' +
     '.cidx .emp{padding:26px 0 30px;text-align:center;font-size:13px;color:#8d8272}' +
     '.cidx .it .go{font-size:12px;color:#a2352a;margin-top:5px}' +
     '@media (max-width:360px){.cas .ce{font-size:13.5px}}';
@@ -115,6 +116,16 @@
   }
   /* 真题索引：把散在卡上的出处按年份排开，从真题反查句子 */
   var IDX = null;
+  function cardOf(cid) {
+    var cs = (window.__DATA__ && window.__DATA__.cards) || [], i;
+    for (i = 0; i < cs.length; i++) if (cs[i].id === cid) return cs[i];
+    return null;
+  }
+  function groupTitle(gid) {
+    var gs = (window.__DATA__ && window.__DATA__.groups) || [], i;
+    for (i = 0; i < gs.length; i++) if (gs[i].id === gid) return gs[i].title;
+    return '';
+  }
   function idxItems() {
     if (IDX) return IDX;
     var a = [], k;
@@ -122,6 +133,8 @@
       var u = CM[k], q = u.q || '', ym = /^(\d{4})/.exec(q);
       a.push({
         id: k, q: q, eg: u.eg || '', zh: u.egzh || '',
+        sec: k.indexOf('e_') === 0 ? '小作文' : '大作文',
+        gr: groupTitle((function (c) { return c && c.g; })(cardOf(k))),
         y: ym ? ym[1] : '通用句式（不绑年份）',
         tp: q.indexOf('英二') >= 0 ? '二' : (q.indexOf('英一') >= 0 ? '一' : '其他')
       });
@@ -159,6 +172,7 @@
         if (k && (t.q + ' ' + t.eg + ' ' + t.zh).toLowerCase().indexOf(k) < 0) return;
         if (t.y !== cur) { cur = t.y; h += '<div class="yr">' + esc(/^\d/.test(cur) ? cur + ' 年' : cur) + '</div>'; }
         h += '<div class="it" data-id="' + esc(t.id) + '"><div class="q">' + esc(t.q) + '</div>' +
+          '<div class="gr">' + esc(t.sec + (t.gr ? ' · ' + t.gr : '')) + '</div>' +
           '<div class="e">' + esc(t.eg) + '</div>' +
           (t.zh ? '<div class="z">' + esc(t.zh) + '</div>' : '') +
           '<div class="go">跳到这张卡 ›</div></div>';
@@ -212,9 +226,28 @@
       else wrap.appendChild(box);
     }
   }
+  /* 词库页顶部也放一个入口：翻题时随手就能查真题 */
+  function mountLib() {
+    if (location.hash !== '#/lib') return;
+    var wrap = document.querySelector('#app .wrap');
+    if (!wrap || wrap.querySelector('#libidxbtn')) return;
+    var n = idxItems().length;
+    if (!n) return;
+    var box = document.createElement('div');
+    box.id = 'libidxbtn';
+    box.innerHTML = '<div class="panel" style="padding:4px 14px;margin:0 0 10px"><div class="glist">' +
+      '<button class="grow" data-cidx="1"><div class="gt"><b>真题索引</b><small>' + n +
+      ' 处出处 · 按年份排开，点一条跳到那张卡</small></div><div class="gp">看</div></button></div></div>';
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-cidx]');
+      if (!b) return;
+      e.preventDefault(); e.stopPropagation(); openIndex();
+    });
+    wrap.insertBefore(box, wrap.firstChild);
+  }
   function tick() {
     CM = window.__CASE__ || CM;
-    try { patchCard(); patchGroup(); mountIndex(); } catch (e) { }
+    try { patchCard(); patchGroup(); mountIndex(); mountLib(); } catch (e) { }
   }
   function init() {
     CM = window.__CASE__ || CM;
