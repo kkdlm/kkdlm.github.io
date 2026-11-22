@@ -116,11 +116,24 @@
         z.open('GET', 'casepatch.js?v=' + Date.now(), true);
         z.onload = function () {
           try { if (z.status < 400 && z.responseText) new Function(z.responseText)(); } catch (e) { }
-          next();
+          quiz();
         };
-        z.onerror = function () { next(); };
+        z.onerror = quiz;
         z.send();
-      } catch (e) { next(); }
+      } catch (e) { quiz(); }
+      /* 真题自测（casequiz.js）：同样取不到就跳过，不影响背卡 */
+      function quiz() {
+        try {
+          var q = new XMLHttpRequest();
+          q.open('GET', 'casequiz.js?v=' + Date.now(), true);
+          q.onload = function () {
+            try { if (q.status < 400 && q.responseText) new Function(q.responseText)(); } catch (e) { }
+            next();
+          };
+          q.onerror = function () { next(); };
+          q.send();
+        } catch (e) { next(); }
+      }
     }
   }
   var MAXP = 8, idx = 1, acc = [], v = Date.now();
