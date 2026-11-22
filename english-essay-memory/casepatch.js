@@ -51,6 +51,10 @@
     '.cidx .it{padding:9px 0 11px;border-bottom:1px dashed #eee6da}' +
     '.cidx .it .q{font-size:12px;color:#7a6f61;line-height:1.58}' +
     '.cidx .it .e{font-family:Georgia,"Times New Roman",serif;font-size:13.5px;line-height:1.52;color:#2b2320;margin-top:4px;word-break:break-word}' +
+    '.cidx .sr{padding:0 16px 10px}' +
+    '.cidx .sr input{width:100%;box-sizing:border-box;border:1px solid #e2dcd2;background:#fffdf8;border-radius:10px;padding:8px 11px;font-size:13px;color:#2b2320;outline:none;-webkit-appearance:none}' +
+    '.cidx .it .z{font-size:12.5px;color:#7a6f61;line-height:1.7;margin-top:5px}' +
+    '.cidx .emp{padding:26px 0 30px;text-align:center;font-size:13px;color:#8d8272}' +
     '.cidx .it .go{font-size:12px;color:#a2352a;margin-top:5px}' +
     '@media (max-width:360px){.cas .ce{font-size:13.5px}}';
 
@@ -117,7 +121,7 @@
     for (k in CM) if (CM.hasOwnProperty(k)) {
       var u = CM[k], q = u.q || '', ym = /^(\d{4})/.exec(q);
       a.push({
-        id: k, q: q, eg: u.eg || '',
+        id: k, q: q, eg: u.eg || '', zh: u.egzh || '',
         y: ym ? ym[1] : '通用句式（不绑年份）',
         tp: q.indexOf('英二') >= 0 ? '二' : (q.indexOf('英一') >= 0 ? '一' : '其他')
       });
@@ -142,20 +146,28 @@
     box.innerHTML = '<div class="box"><div class="hd"><h3>真题索引</h3><span class="n">' + items.length + ' 处</span><button class="x">×</button></div>' +
       '<div class="fl"><button data-f="all" class="on">全部 ' + items.length + '</button>' +
       '<button data-f="一">英一 ' + n1 + '</button><button data-f="二">英二 ' + n2 + '</button>' +
-      '<button data-f="其他">通用 ' + n3 + '</button></div><div class="bd"></div></div>';
+      '<button data-f="其他">通用 ' + n3 + '</button></div>' +
+      '<div class="sr"><input type="text" inputmode="search" placeholder="搜英文 / 中文 / 年份，如 2023、邀请、art"></div>' +
+      '<div class="bd"></div></div>';
     document.body.appendChild(box);
     var bd = box.querySelector('.bd');
+    var kw = '';
     function draw(f) {
-      var cur = null, h = '';
+      var cur = null, h = '', k = kw ? kw.toLowerCase() : '';
       items.forEach(function (t) {
         if (f !== 'all' && t.tp !== f) return;
+        if (k && (t.q + ' ' + t.eg + ' ' + t.zh).toLowerCase().indexOf(k) < 0) return;
         if (t.y !== cur) { cur = t.y; h += '<div class="yr">' + esc(/^\d/.test(cur) ? cur + ' 年' : cur) + '</div>'; }
         h += '<div class="it" data-id="' + esc(t.id) + '"><div class="q">' + esc(t.q) + '</div>' +
-          '<div class="e">' + esc(t.eg) + '</div><div class="go">跳到这张卡 ›</div></div>';
+          '<div class="e">' + esc(t.eg) + '</div>' +
+          (t.zh ? '<div class="z">' + esc(t.zh) + '</div>' : '') +
+          '<div class="go">跳到这张卡 ›</div></div>';
       });
-      bd.innerHTML = h || '<div class="note">这一类暂时没有挂真题的卡。</div>';
+      bd.innerHTML = h || '<div class="emp">没找到——换个词试试，或把筛选切回「全部」。</div>';
     }
     draw('all');
+    var sr = box.querySelector('.sr input');
+    sr.oninput = function () { kw = this.value.replace(/^\s+|\s+$/g, ''); draw(box.querySelector('.fl .on').getAttribute('data-f')); bd.scrollTop = 0; };
     box.querySelector('.fl').onclick = function (e) {
       var b = e.target.closest('[data-f]');
       if (!b) return;
