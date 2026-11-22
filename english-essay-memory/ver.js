@@ -48,7 +48,7 @@
     var el = document.getElementById('toast');
     if (!el) return;
     el.textContent = t; el.classList.add('show');
-    clearTimeout(el._toast);
+    clearTimeout(el._tt);
     el._tt = setTimeout(function () { el.classList.remove('show'); }, 2200);
   }
 
