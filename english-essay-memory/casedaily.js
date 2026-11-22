@@ -1,4 +1,4 @@
-/* 学习报告：今天背什么 / 打卡日历 / 近两周作答 / 记忆持久度 / 未来七天复习预测
+/* 学习报告：今天背什么 / 考前够不够 / 打卡日历 / 近两周作答 / 记忆持久度 / 未来七天复习预测
    数据全部从本机进度（ky_zw_v1）现算，不动程序包、不联网 */
 (function () {
   'use strict';
@@ -43,6 +43,12 @@
     '.cst .plan i{display:block;font-style:normal;font-size:11px;color:#8d8272;margin-top:2px}' +
     '.cst .gobtn{display:block;width:100%;margin-top:10px;border:0;border-radius:11px;padding:12px 0;background:#a2352a;color:#fdf8f0;font-size:14px}' +
     '.cst .gobtn[disabled]{background:#e6ded2;color:#8d8272}' +
+    '.cst .eta .er{display:flex;align-items:baseline;gap:8px;margin-top:9px}' +
+    '.cst .eta .er em{font-style:normal;width:64px;flex:none;color:#8d8272;font-size:12px}' +
+    '.cst .eta .er b{font-family:Georgia,"Times New Roman",serif;font-size:19px;color:#a2352a;line-height:1.1}' +
+    '.cst .eta .er i{font-style:normal;font-size:11.5px;color:#a89c8b}' +
+    '.cst .verdict{margin-top:12px;padding:10px 12px;border-radius:10px;background:#fffdf7;border:1px solid #e6ded2;font-size:12.5px;line-height:1.7;color:#4a423b}' +
+    '.cst .verdict b{color:#a2352a}' +
     '@media (max-width:360px){.cst .chart .col b{font-size:9px}}';
 
   function esc(s) {
@@ -113,6 +119,19 @@
     o.todayAll = tk.all || 0;
     o.todayOk = tk.ok || 0;
     o.todayBad = tk.bad || 0;
+    /* 考前够不够：距考试天数 + 未上过张数 + 最近 7 天新学速度 */
+    o.unlearned = lv[0];
+    o.exam = (S.set && S.set.exam) || '';
+    o.daysLeft = -1;
+    if (o.exam) {
+      var ex = new Date(o.exam + 'T00:00:00'), td = new Date(); td.setHours(0, 0, 0, 0);
+      if (!isNaN(ex.getTime())) o.daysLeft = Math.round((ex.getTime() - td.getTime()) / DAY);
+    }
+    var n7 = 0;
+    for (var z = 7; z <= 13; z++) n7 += d14[z].n;
+    o.avg7 = n7 / 7;
+    o.needPerDay = o.daysLeft > 0 ? Math.ceil(o.unlearned / o.daysLeft) : 0;
+    o.etaDays = o.avg7 > 0 ? Math.ceil(o.unlearned / o.avg7) : 0;
     return o;
   }
 
@@ -156,6 +175,35 @@
     h += '<div class="note">新卡配额 ' + o.quota + ' 张，今天已上新 ' + o.newToday + ' 张；到期数含过期没做的。' +
       (o.todayAll ? '今天已作答 ' + o.todayAll + ' 张。' : '') +
       '</div></div>';
+
+    /* 1.5 考前够不够 */
+    if (o.daysLeft >= 0 && o.unlearned > 0) {
+      var etaStr = '';
+      if (o.etaDays > 0) {
+        var ed = new Date(); ed.setHours(0, 0, 0, 0); ed = new Date(ed.getTime() + o.etaDays * DAY);
+        etaStr = '按这个速度 ' + (ed.getMonth() + 1) + '/' + ed.getDate() + ' 过完' + (o.etaDays > o.daysLeft ? '，晚于考试' : '');
+      }
+      h += '<div class="blk"><div class="bt">考前够不够<span>按最近 7 天的速度估</span></div><div class="eta">' +
+        '<div class="er"><em>距考试</em><b>' + o.daysLeft + ' 天</b><i>' + o.exam + '</i></div>' +
+        '<div class="er"><em>还没上过</em><b>' + o.unlearned + ' 张</b><i>共 ' + o.total + ' 张</i></div>' +
+        '<div class="er"><em>每天要背</em><b>' + o.needPerDay + ' 张</b><i>才够考前过一遍</i></div>' +
+        '<div class="er"><em>最近 7 天</em><b>' + (o.avg7 ? Math.round(o.avg7 * 10) / 10 + ' 张/天' : '没上新课') + '</b><i>' +
+          (etaStr || '') + '</i></div>' +
+        '</div>';
+      if (o.avg7 >= o.needPerDay) {
+        var spare = Math.floor(o.avg7 * o.daysLeft) - o.unlearned;
+        h += '<div class="verdict">按现在的速度，考前能把没上过的都过一遍；' +
+          '<b>' + o.daysLeft + '</b> 天 × ' + (Math.round(o.avg7 * 10) / 10) + ' 张 ≈ <b>' +
+          Math.floor(o.avg7 * o.daysLeft) + '</b> 张的容量，比要背的 ' + o.unlearned + ' 张' +
+          (spare > 0 ? '多出 <b>' + spare + '</b> 张。' : '正好够。') + '</div>';
+      } else if (o.avg7 > 0) {
+        h += '<div class="verdict">照现在的速度赶不上：每天得再多上 <b>' + (o.needPerDay - Math.round(o.avg7)) +
+          '</b> 张，或者把配额从 ' + o.quota + ' 调上去。</div>';
+      } else {
+        h += '<div class="verdict">最近七天还没上新课。要考前过一遍，每天得开 <b>' + o.needPerDay + '</b> 张新卡。</div>';
+      }
+      h += '</div>';
+    }
 
     /* 1. 打卡 */
     h += '<div class="blk"><div class="bt">打卡<span>今天有作答就算打卡</span></div>' +
