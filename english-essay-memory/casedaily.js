@@ -333,7 +333,7 @@
       h += '</div>';
     }
     h += '<div class="note">今天到期 ' + o.dueToday + ' 张；明天 ' + o.due7[1] + ' 张、后天 ' + o.due7[2] + ' 张。' +
-      (o.dueToday + o.due7[1] + o.due7[2] ? '到期多就先只做复习，不追新卡。' : '还没开始背，所以没有排期。') + '</div></div>';
+      (o.dueToday + o.due7[1] + o.due7[2] ? '到期多就先只做复习，不追新卡。' : '这几天没有到期的卡，可以安心上新卡。') + '</div></div>';
 
     bd.innerHTML = h;
     var go = bd.querySelector('[data-plan="go"]');
