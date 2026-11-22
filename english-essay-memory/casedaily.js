@@ -1,4 +1,4 @@
-/* 学习报告：今天背什么 / 考前够不够 / 打卡日历 / 认得率 / 近两周作答 / 记忆持久度 / 未来七天复习预测
+/* 学习报告：今天背什么 / 考前够不够 / 本周目标 / 打卡日历 / 认得率 / 近两周作答 / 记忆持久度 / 未来七天复习预测
    数据全部从本机进度（ky_zw_v1）现算，不动程序包、不联网 */
 (function () {
   'use strict';
@@ -51,6 +51,13 @@
     '.cst .verdict b{color:#a2352a}' +
     '.cst .rows .r .b i.mid{background:#d9a39b}' +
     '.cst .rows .r .b i.forget{background:#8d8272}' +
+    '.cst .goal{margin-top:6px}' +
+    '.cst .goal .bar{height:10px;border-radius:6px;background:#efe9df;overflow:hidden}' +
+    '.cst .goal .bar i{display:block;height:100%;background:#a2352a;border-radius:6px}' +
+    '.cst .goal .top{display:flex;align-items:baseline;justify-content:space-between;margin-top:8px}' +
+    '.cst .goal .top b{font-family:Georgia,"Times New Roman",serif;font-size:20px;color:#a2352a;line-height:1.2}' +
+    '.cst .goal .top b i{font-style:normal;font-size:12px;color:#8d8272;font-family:inherit;margin-left:2px}' +
+    '.cst .goal .top u{text-decoration:none;font-size:11.5px;color:#a89c8b}' +
     '@media (max-width:360px){.cst .chart .col b{font-size:9px}}';
 
   function esc(s) {
@@ -143,6 +150,22 @@
     o.kAll = kAll; o.kOk = kOk; o.kBad = kBad;
     o.kFuzzy = Math.max(0, kAll - kOk - kBad);
     o.kRate = kAll ? Math.round(kOk / kAll * 100) : -1;
+    /* 本周（周一起算）：按配额算周目标，进度用新学张数 */
+    var td0 = new Date(); td0.setHours(0, 0, 0, 0);
+    var wd = (td0.getDay() + 6) % 7;            /* 0=周一 … 6=周日 */
+    var wStart = new Date(td0.getTime() - wd * DAY);
+    o.weekWd = wd; o.weekLeft = 7 - wd;          /* 含今天还剩几天 */
+    o.weekDays = wd + 1;
+    var wN = 0, wAll = 0, wOk = 0;
+    for (var wi = wd; wi >= 0; wi--) {
+      var wk = dayStr(-wi), wr = hist[wk] || {};
+      wN += wr.n || 0; wAll += wr.all || 0; wOk += wr.ok || 0;
+    }
+    o.weekN = wN; o.weekAll = wAll; o.weekOk = wOk;
+    o.weekTarget = o.quota * 7;
+    o.weekPct = o.weekTarget ? Math.min(100, Math.round(wN / o.weekTarget * 100)) : 0;
+    o.weekRest = Math.max(0, o.weekTarget - wN);
+    o.weekNeed = o.weekRest > 0 ? Math.ceil(o.weekRest / o.weekLeft) : 0;
     return o;
   }
 
@@ -215,6 +238,18 @@
       }
       h += '</div>';
     }
+
+    /* 0.5 本周目标 */
+    h += '<div class="blk"><div class="bt">本周目标<span>周一起算，按每日配额 × 7 天</span></div><div class="goal">' +
+      '<div class="bar"><i style="width:' + o.weekPct + '%"></i></div>' +
+      '<div class="top"><b>' + o.weekN + '<i> 张</i></b><u>目标 ' + o.weekTarget + ' 张 · 已完成 ' + o.weekPct + '%</u></div>' +
+      '<div class="note">本周已作答 ' + o.weekAll + ' 张（含复习），新学 ' + o.weekN + ' 张；本周一到现在共 ' + o.weekDays + ' 天。' +
+      (o.weekRest > 0
+        ? (o.weekLeft > 1
+            ? '还剩 ' + o.weekLeft + ' 天（含今天），每天再上 <b>' + o.weekNeed + '</b> 张就够。'
+            : '这周就剩今天了，还差 <b>' + o.weekRest + '</b> 张，补上才达标。')
+        : '本周已经达成，超出 ' + (o.weekN - o.weekTarget) + ' 张。') +
+      '</div></div></div>';
 
     /* 1. 打卡 */
     h += '<div class="blk"><div class="bt">打卡<span>今天有作答就算打卡</span></div>' +
