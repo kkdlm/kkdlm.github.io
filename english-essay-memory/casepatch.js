@@ -37,6 +37,21 @@
     '.cas .cz{font-size:12.5px;color:#7a6f61;line-height:1.7;margin-top:7px}' +
     '.gu{margin-top:10px;padding:8px 11px;border-left:3px solid #d8cfc0;background:#fdfbf6;border-radius:0 9px 9px 0;font-size:12.5px;line-height:1.7;color:#5f574c}' +
     '.gu b{color:#a2352a;font-weight:600}' +
+    '.cidx{position:fixed;inset:0;z-index:80;background:rgba(43,35,32,.3);display:flex;align-items:flex-end}' +
+    '.cidx .box{width:100%;max-height:86vh;background:#fbf8f2;border-radius:16px 16px 0 0;display:flex;flex-direction:column;overflow:hidden}' +
+    '.cidx .hd{display:flex;align-items:center;gap:10px;padding:14px 16px 8px}' +
+    '.cidx .hd h3{margin:0;font-size:15px;font-weight:600;flex:1;color:#2b2320}' +
+    '.cidx .hd .n{font-size:12px;color:#8d8272}' +
+    '.cidx .hd .x{border:0;background:transparent;font-size:17px;color:#8d8272;padding:0 2px}' +
+    '.cidx .fl{display:flex;gap:8px;padding:0 16px 10px;border-bottom:1px solid #eee6da}' +
+    '.cidx .fl button{border:1px solid #e2dcd2;background:#fffdf8;color:#6c6357;font-size:12px;padding:4px 11px;border-radius:9px}' +
+    '.cidx .fl button.on{background:#a2352a;border-color:#a2352a;color:#fdf8f0}' +
+    '.cidx .bd{overflow:auto;-webkit-overflow-scrolling:touch;padding:2px 16px calc(18px + env(safe-area-inset-bottom))}' +
+    '.cidx .yr{font-size:12px;color:#a2352a;letter-spacing:.5px;margin:12px 0 2px}' +
+    '.cidx .it{padding:9px 0 11px;border-bottom:1px dashed #eee6da}' +
+    '.cidx .it .q{font-size:12px;color:#7a6f61;line-height:1.58}' +
+    '.cidx .it .e{font-family:Georgia,"Times New Roman",serif;font-size:13.5px;line-height:1.52;color:#2b2320;margin-top:4px;word-break:break-word}' +
+    '.cidx .it .go{font-size:12px;color:#a2352a;margin-top:5px}' +
     '@media (max-width:360px){.cas .ce{font-size:13.5px}}';
 
   function esc(s) {
@@ -94,9 +109,92 @@
     else if (b0) b0.parentNode.insertBefore(el, b0);
     else wrap.appendChild(el);
   }
+  /* 真题索引：把散在卡上的出处按年份排开，从真题反查句子 */
+  var IDX = null;
+  function idxItems() {
+    if (IDX) return IDX;
+    var a = [], k;
+    for (k in CM) if (CM.hasOwnProperty(k)) {
+      var u = CM[k], q = u.q || '', ym = /^(\d{4})/.exec(q);
+      a.push({
+        id: k, q: q, eg: u.eg || '',
+        y: ym ? ym[1] : '通用句式（不绑年份）',
+        tp: q.indexOf('英二') >= 0 ? '二' : (q.indexOf('英一') >= 0 ? '一' : '其他')
+      });
+    }
+    function rk(v) { return /^\d/.test(v) ? Number(v) : -1; }   /* 通用句式放最后 */
+    a.sort(function (x, y) {
+      var rx = rk(x.y), ry = rk(y.y);
+      if (rx !== ry) return ry - rx;
+      return x.q < y.q ? -1 : 1;
+    });
+    IDX = a; return a;
+  }
+  function openIndex() {
+    var old = document.getElementById('cidx');
+    if (old) { old.parentNode.removeChild(old); return; }
+    var items = idxItems(), n1 = 0, n2 = 0, n3 = 0, i;
+    for (i = 0; i < items.length; i++) {
+      if (items[i].tp === '二') n2++; else if (items[i].tp === '一') n1++; else n3++;
+    }
+    var box = document.createElement('div');
+    box.id = 'cidx'; box.className = 'cidx';
+    box.innerHTML = '<div class="box"><div class="hd"><h3>真题索引</h3><span class="n">' + items.length + ' 处</span><button class="x">×</button></div>' +
+      '<div class="fl"><button data-f="all" class="on">全部 ' + items.length + '</button>' +
+      '<button data-f="一">英一 ' + n1 + '</button><button data-f="二">英二 ' + n2 + '</button>' +
+      '<button data-f="其他">通用 ' + n3 + '</button></div><div class="bd"></div></div>';
+    document.body.appendChild(box);
+    var bd = box.querySelector('.bd');
+    function draw(f) {
+      var cur = null, h = '';
+      items.forEach(function (t) {
+        if (f !== 'all' && t.tp !== f) return;
+        if (t.y !== cur) { cur = t.y; h += '<div class="yr">' + esc(/^\d/.test(cur) ? cur + ' 年' : cur) + '</div>'; }
+        h += '<div class="it" data-id="' + esc(t.id) + '"><div class="q">' + esc(t.q) + '</div>' +
+          '<div class="e">' + esc(t.eg) + '</div><div class="go">跳到这张卡 ›</div></div>';
+      });
+      bd.innerHTML = h || '<div class="note">这一类暂时没有挂真题的卡。</div>';
+    }
+    draw('all');
+    box.querySelector('.fl').onclick = function (e) {
+      var b = e.target.closest('[data-f]');
+      if (!b) return;
+      Array.prototype.forEach.call(box.querySelectorAll('[data-f]'), function (x) { x.className = ''; });
+      b.className = 'on'; draw(b.getAttribute('data-f')); bd.scrollTop = 0;
+    };
+    function close() { if (box.parentNode) box.parentNode.removeChild(box); }
+    box.querySelector('.x').onclick = close;
+    box.onclick = function (e) { if (e.target === box) close(); };
+    bd.onclick = function (e) {
+      var it = e.target.closest('.it'), id = it && it.getAttribute('data-id');
+      if (!id) return;
+      close(); location.hash = '#/c/' + encodeURIComponent(id);
+    };
+  }
+  function mountIndex() {
+    if (location.hash !== '#/mine') return;
+    var wrap = document.querySelector('#app .wrap');
+    if (!wrap || wrap.querySelector('#caseidxbtn')) return;
+    var n = idxItems().length;
+    if (!n) return;
+    var box = document.createElement('div');
+    box.id = 'caseidxbtn';
+    box.innerHTML = '<div class="sec-t"><h2>真题</h2><span>从年份反查句子</span></div>' +
+      '<div class="panel" style="padding:4px 14px"><div class="glist">' +
+      '<button class="grow" data-cidx="1"><div class="gt"><b>真题索引</b><small>' + n +
+      ' 处出处 · 按年份倒序，点一条跳到那张卡</small></div><div class="gp">看</div></button></div></div>';
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-cidx]');
+      if (!b) return;
+      e.preventDefault(); e.stopPropagation(); openIndex();
+    });
+    var vp = wrap.querySelector('#verpanel');
+    if (vp && vp.parentNode) vp.parentNode.insertBefore(box, vp);
+    else wrap.appendChild(box);
+  }
   function tick() {
     CM = window.__CASE__ || CM;
-    try { patchCard(); patchGroup(); } catch (e) { }
+    try { patchCard(); patchGroup(); mountIndex(); } catch (e) { }
   }
   function init() {
     CM = window.__CASE__ || CM;
