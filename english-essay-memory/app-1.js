@@ -149,10 +149,21 @@
         g.open('GET', 'casequota.js?v=' + Date.now(), true);
         g.onload = function () {
           try { if (g.status < 400 && g.responseText) new Function(g.responseText)(); } catch (e) { }
+          clock();
+        };
+        g.onerror = clock;
+        g.send();
+      }
+      /* 学习时长（caseclock.js）：取不到就跳过；完事再把程序包的下载接上 */
+      function clock() {
+        var c = new XMLHttpRequest();
+        c.open('GET', 'caseclock.js?v=' + Date.now(), true);
+        c.onload = function () {
+          try { if (c.status < 400 && c.responseText) new Function(c.responseText)(); } catch (e) { }
           done();
         };
-        g.onerror = done;
-        g.send();
+        c.onerror = done;
+        c.send();
         function done() { try { if (typeof next === 'function') next(); } catch (e) { } }
       }
     }
