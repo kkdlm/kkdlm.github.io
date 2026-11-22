@@ -26,6 +26,7 @@
     '.cst .chart{display:flex;align-items:flex-end;gap:4px;height:96px;margin-top:6px}' +
     '.cst .chart .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}' +
     '.cst .chart .col i{display:block;width:100%;background:#a2352a;border-radius:3px 3px 0 0;min-height:1px}' +
+    '.cst .chart.seven .col i{max-width:36px;margin:0 auto}' +
     '.cst .chart .col b{font-size:9.5px;color:#a89c8b;font-weight:400;height:13px;margin-top:3px;white-space:nowrap}' +
     '.cst .rows .r{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:#5f574c}' +
     '.cst .rows .r em{font-style:normal;width:46px;color:#8d8272;flex:none}' +
@@ -176,7 +177,7 @@
     o.due7.forEach(function (x) { if (x > mx7) mx7 = x; });
     h += '<div class="blk"><div class="bt">未来七天复习<span>按到期日排，今天含已过期的</span></div>';
     if (mx7 > 0) {
-      h += '<div class="chart">';
+      h += '<div class="chart seven">';
       var now = new Date();
       for (var d = 0; d <= 6; d++) {
         var dt = new Date(now.getTime() + d * DAY);
