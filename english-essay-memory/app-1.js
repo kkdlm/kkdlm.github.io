@@ -79,9 +79,9 @@
       applyCase(cb);
     }
   }
-  /* 真题补丁：case-1/2.json 里是每张卡的「真题 · 什么时候用」，贴到卡面 tip 上 */
+  /* 真题补丁：case-1/2/3.json 里是每张卡的「真题 · 什么时候用」，贴到卡面 tip 上 */
   function applyCase(next) {
-    var parts = ['case-1.json', 'case-2.json'], got = 0, all = [];
+    var parts = ['case-1.json', 'case-2.json', 'case-3.json'], got = 0, all = [];
     parts.forEach(function (p, i) {
       var y = new XMLHttpRequest();
       y.open('GET', p + '?v=' + Date.now(), true);
