@@ -1,4 +1,4 @@
-/* 学习报告：今天背什么 / 考前够不够 / 打卡日历 / 近两周作答 / 记忆持久度 / 未来七天复习预测
+/* 学习报告：今天背什么 / 考前够不够 / 打卡日历 / 认得率 / 近两周作答 / 记忆持久度 / 未来七天复习预测
    数据全部从本机进度（ky_zw_v1）现算，不动程序包、不联网 */
 (function () {
   'use strict';
@@ -49,6 +49,8 @@
     '.cst .eta .er i{font-style:normal;font-size:11.5px;color:#a89c8b}' +
     '.cst .verdict{margin-top:12px;padding:10px 12px;border-radius:10px;background:#fffdf7;border:1px solid #e6ded2;font-size:12.5px;line-height:1.7;color:#4a423b}' +
     '.cst .verdict b{color:#a2352a}' +
+    '.cst .rows .r .b i.mid{background:#d9a39b}' +
+    '.cst .rows .r .b i.forget{background:#8d8272}' +
     '@media (max-width:360px){.cst .chart .col b{font-size:9px}}';
 
   function esc(s) {
@@ -132,6 +134,15 @@
     o.avg7 = n7 / 7;
     o.needPerDay = o.daysLeft > 0 ? Math.ceil(o.unlearned / o.daysLeft) : 0;
     o.etaDays = o.avg7 > 0 ? Math.ceil(o.unlearned / o.avg7) : 0;
+    /* 近 14 天认得率：记得 / 模糊 / 忘了，口径与首页一致（ok 计记得，bad 计忘了） */
+    var kAll = 0, kOk = 0, kBad = 0;
+    d14.forEach(function (x) {
+      var r2 = hist[x.k] || {};
+      kAll += r2.all || 0; kOk += r2.ok || 0; kBad += r2.bad || 0;
+    });
+    o.kAll = kAll; o.kOk = kOk; o.kBad = kBad;
+    o.kFuzzy = Math.max(0, kAll - kOk - kBad);
+    o.kRate = kAll ? Math.round(kOk / kAll * 100) : -1;
     return o;
   }
 
@@ -235,6 +246,25 @@
       h += '</div><div class="note">今天 ' + o.d14[13].all + ' 张，其中新学 ' + o.d14[13].n + ' 张；没作答的日子柱子只剩一道浅线。</div>';
     } else {
       h += '<div class="note">今天 ' + o.d14[13].all + ' 张。开始背之后，这里会按天统计作答量。</div>';
+    }
+    h += '</div>';
+
+    /* 2.5 认得率 */
+    h += '<div class="blk"><div class="bt">认得率<span>近 14 天，记得 / 模糊 / 忘了</span></div>';
+    if (o.kAll) {
+      var pOk = Math.round(o.kOk / o.kAll * 100), pBad = Math.round(o.kBad / o.kAll * 100),
+          pFz = Math.max(0, 100 - pOk - pBad), a = o.d14.filter(function (x) { return x.all > 0; }).length;
+      h += '<div class="rows">' +
+        '<div class="r"><em>记得</em><div class="b"><i style="width:' + Math.max(pOk ? 3 : 0, pOk) + '%"></i></div><u>' + pOk + '%</u></div>' +
+        '<div class="r"><em>模糊</em><div class="b"><i class="mid" style="width:' + Math.max(pFz ? 3 : 0, pFz) + '%"></i></div><u>' + pFz + '%</u></div>' +
+        '<div class="r"><em>忘了</em><div class="b"><i class="forget" style="width:' + Math.max(pBad ? 3 : 0, pBad) + '%"></i></div><u>' + pBad + '%</u></div>' +
+        '</div><div class="note">' + a + ' 天有作答，共 ' + o.kAll + ' 张：记得 ' + o.kOk + ' 张、模糊 ' + o.kFuzzy +
+        ' 张、忘了 ' + o.kBad + ' 张。' +
+        (pBad >= 15 ? '忘的比例偏高，先把配额降一点回炉，别硬上新卡。' :
+          (pOk >= 70 ? '记得住，配额可以维持甚至往上加。' : '凑合，模糊的那批挑出来再背一轮更稳。')) +
+        '</div>';
+    } else {
+      h += '<div class="note">近两周还没有作答记录。</div>';
     }
     h += '</div>';
 
