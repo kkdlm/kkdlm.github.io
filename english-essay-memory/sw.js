@@ -1,5 +1,5 @@
 /* 离线缓存：第一次打开存一份，之后秒开；网速优先，取不到才用缓存 */
-const CACHE = 'eem-1.3.1b';
+const CACHE = 'eem-1.3.2';
 const ASSETS = ["./", "index.html", "style.css", "data.txt", "extra.txt", "hide.txt", "pkg-1.txt", "pkg-2.txt", "pkg-3.txt", "pkg-4.txt", "pkg-5.txt", "case-1.json", "case-2.json", "case-3.json", "casepatch.js", "casequiz.js", "casedaily.js", "ver.js", "ver2.js", "version.json", "manifest.webmanifest", "icon.svg"];
 
 self.addEventListener('install', e => {
