@@ -75,7 +75,7 @@
         d.cards = d.cards.filter(function (c) { return !m[c.id]; });
       }
       var n = (d.cards || []).length, el = document.querySelector('.sp-s');
-      if (n && el) el.textContent = '背诵程序 · ' + n + ' 张卡 · 六大方面';
+      if (n && el) el.textContent = '背诵程序 · ' + n + ' 张卡 · 大作文 + 小作文';
       cb();
     }
   }
