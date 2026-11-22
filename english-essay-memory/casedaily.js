@@ -1,4 +1,4 @@
-/* 学习报告：打卡日历 / 近两周作答 / 记忆持久度 / 未来七天复习预测
+/* 学习报告：今天背什么 / 打卡日历 / 近两周作答 / 记忆持久度 / 未来七天复习预测
    数据全部从本机进度（ky_zw_v1）现算，不动程序包、不联网 */
 (function () {
   'use strict';
@@ -36,6 +36,13 @@
     '.cst .rows .r u{text-decoration:none;width:38px;text-align:right;color:#2b2320;flex:none}' +
     '.cst .note{font-size:11.5px;color:#a89c8b;line-height:1.7;margin-top:10px}' +
     '.cst .streak{display:flex;gap:18px;align-items:flex-end}' +
+    '.cst .plan{display:flex;gap:0;border:1px solid #e6ded2;border-radius:12px;background:#fffdf7;padding:12px 14px;margin-top:4px}' +
+    '.cst .plan div{flex:1;text-align:center}' +
+    '.cst .plan div+div{border-left:1px solid #efe7dc}' +
+    '.cst .plan b{display:block;font-family:Georgia,"Times New Roman",serif;font-size:24px;color:#a2352a;line-height:1.15}' +
+    '.cst .plan i{display:block;font-style:normal;font-size:11px;color:#8d8272;margin-top:2px}' +
+    '.cst .gobtn{display:block;width:100%;margin-top:10px;border:0;border-radius:11px;padding:12px 0;background:#a2352a;color:#fdf8f0;font-size:14px}' +
+    '.cst .gobtn[disabled]{background:#e6ded2;color:#8d8272}' +
     '@media (max-width:360px){.cst .chart .col b{font-size:9px}}';
 
   function esc(s) {
@@ -98,6 +105,14 @@
     }
     o.grid = g; o.maxAll = maxAll;
     o.mastered = lv[5] + lv[6] + lv[7];
+    /* 今日计划：到期（含过期）+ 新卡剩余配额 */
+    var tk = hist[dayStr(0)] || {};
+    o.quota = (S.set && S.set.newPerDay) || 25;
+    o.newToday = tk.n || 0;
+    o.newLeft = Math.max(0, o.quota - o.newToday);
+    o.todayAll = tk.all || 0;
+    o.todayOk = tk.ok || 0;
+    o.todayBad = tk.bad || 0;
     return o;
   }
 
@@ -105,7 +120,7 @@
     if (!o.startToday && !o.streak) return '还没有记录 · 背几张就会开始打卡';
     var t = '连续 ' + o.streak + ' 天';
     if (!o.startToday) t += '（今天还没打卡）';
-    t += ' · 累计 ' + o.totalDays + ' 天 · 今日 ' + o.d14[13].all + ' 张';
+    t += ' · 待复习 ' + o.dueToday + ' 张';
     return t;
   }
 
@@ -124,6 +139,23 @@
     box.onclick = function (e) { if (e.target === box) close(); };
 
     var WD = ['日', '一', '二', '三', '四', '五', '六'], h = '';
+
+    /* 0. 今天背什么：到期 + 新卡，一键开队列 */
+    var planN = o.dueToday + o.newLeft;
+    h += '<div class="blk"><div class="bt">今天背什么<span>到期先复习，再按配额上新课</span></div>' +
+      '<div class="plan">' +
+      '<div><b>' + o.dueToday + '</b><i>张到期</i></div>' +
+      '<div><b>' + o.newLeft + '</b><i>张新卡</i></div>' +
+      '<div><b>' + planN + '</b><i>张合计</i></div>' +
+      '</div>';
+    if (planN > 0) {
+      h += '<button class="gobtn" data-plan="go">开始今天的 ' + planN + ' 张</button>';
+    } else {
+      h += '<button class="gobtn" disabled>今天这一轮已经背完</button>';
+    }
+    h += '<div class="note">新卡配额 ' + o.quota + ' 张，今天已上新 ' + o.newToday + ' 张；到期数含过期没做的。' +
+      (o.todayAll ? '今天已作答 ' + o.todayAll + ' 张。' : '') +
+      '</div></div>';
 
     /* 1. 打卡 */
     h += '<div class="blk"><div class="bt">打卡<span>今天有作答就算打卡</span></div>' +
@@ -191,6 +223,13 @@
       (o.dueToday + o.due7[1] + o.due7[2] ? '到期多就先只做复习，不追新卡。' : '还没开始背，所以没有排期。') + '</div></div>';
 
     bd.innerHTML = h;
+    var go = bd.querySelector('[data-plan="go"]');
+    if (go) go.onclick = function () {
+      close();
+      var btn = document.querySelector('#app [data-act="daily"]');
+      if (btn) { btn.click(); return; }
+      location.hash = '#/';
+    };
   }
 
   /* 首页「今日」面板下面挂入口 */
