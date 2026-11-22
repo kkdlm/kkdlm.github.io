@@ -104,12 +104,23 @@
         else if (c.tip.indexOf('真题 · 什么时候用') < 0) c.tip = c.tip + '\n' + add;
         n++;
       });
+      window.__CASE__ = m;
       try {
         var st = document.createElement('style');
         st.textContent = '.tip{white-space:pre-line}';
         document.head.appendChild(st);
       } catch (e) { }
-      next();
+      /* 真题块 / 组页提示的挂载逻辑在 casepatch.js：取不到就直接进主程序 */
+      try {
+        var z = new XMLHttpRequest();
+        z.open('GET', 'casepatch.js?v=' + Date.now(), true);
+        z.onload = function () {
+          try { if (z.status < 400 && z.responseText) new Function(z.responseText)(); } catch (e) { }
+          next();
+        };
+        z.onerror = function () { next(); };
+        z.send();
+      } catch (e) { next(); }
     }
   }
   var MAXP = 8, idx = 1, acc = [], v = Date.now();
