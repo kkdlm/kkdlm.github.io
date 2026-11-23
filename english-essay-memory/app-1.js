@@ -154,16 +154,27 @@
         g.onerror = clock;
         g.send();
       }
-      /* 学习时长（caseclock.js）：取不到就跳过；完事再把程序包的下载接上 */
+      /* 学习时长（caseclock.js）：取不到就跳过 */
       function clock() {
         var c = new XMLHttpRequest();
         c.open('GET', 'caseclock.js?v=' + Date.now(), true);
         c.onload = function () {
           try { if (c.status < 400 && c.responseText) new Function(c.responseText)(); } catch (e) { }
+          study();
+        };
+        c.onerror = study;
+        c.send();
+      }
+      /* 背卡辅助：读音 / 自动朗读 / 勾骨架（casestudy.js）；完事再把程序包的下载接上 */
+      function study() {
+        var s = new XMLHttpRequest();
+        s.open('GET', 'casestudy.js?v=' + Date.now(), true);
+        s.onload = function () {
+          try { if (s.status < 400 && s.responseText) new Function(s.responseText)(); } catch (e) { }
           done();
         };
-        c.onerror = done;
-        c.send();
+        s.onerror = done;
+        s.send();
         function done() { try { if (typeof next === 'function') next(); } catch (e) { } }
       }
     }
